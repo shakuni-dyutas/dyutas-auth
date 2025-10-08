@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Run Air",
+        "type": "shell",
+        "command": "air", 
+        "problemMatcher": {
+          "owner": "custom",
+          "pattern": {
+            "regexp": "API server listening at: \\[::\\]:2345",
+            "file": 0,
+            "location": 0,
+            "message": 0
+          },
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".*",
+            "endsPattern": "API server listening at: \\[::\\]:2345"
+          }
+        },
+        "isBackground": true,
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": false,
+          "panel": "dedicated"
+        }
+      }
+    ]
+  }
+  

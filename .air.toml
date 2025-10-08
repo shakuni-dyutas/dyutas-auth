@@ -3,8 +3,8 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  args_bin = []
-  bin = "./tmp/dyutas-auth"
+  bin = "/$(which dlv)"
+  args_bin = ["exec", "--listen=:2345", "--headless=true", "--api-version=2", "--accept-multiclient", "--log", "--continue", "./tmp/dyutas-auth"]
   cmd = "go build -o ./tmp/dyutas-auth ."
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
