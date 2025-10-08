@@ -1,2 +1,3 @@
 # dyutas-auth
-Dyutas' user and auth service, which is based on Golang.
+
+Dyutas' user and auth service.

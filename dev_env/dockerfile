@@ -1,0 +1,47 @@
+# -- currently not used ---
+# There are two ways to candidates.
+#   1. Containerizing development environment same as production.
+#     In this case, production isn't gonna have build tools.
+#     So for hot-reload, the whole image should be rebuilt and re-run.
+#   2. Containerizing development environment just for same development experience.
+#     This one is not about consistency with production but for development consistency,
+#     Like same lint tool, same tools' version et cetera.
+#
+#  I read some articles about those two ways but containerizing development environment can be delayed.
+#  Just composing up will be enough.
+
+# --- builder ---
+FROM golang:1.25 AS builder
+
+WORKDIR /src
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . ./
+
+
+RUN go build \
+    -gcflags="all=-N -l" \
+    -o /app/server .
+
+RUN go get -u github.com/go-delve/delve/cmd/dlv
+
+# --- runtime ---
+FROM debian:bookworm-slim
+
+WORKDIR /app
+
+COPY --from=builder /app/server /app/server
+COPY --from=builder /go/bin/dlv /bin
+
+EXPOSE 8080
+EXPOSE 2345
+
+ENV PORT=8080
+
+# - headless: no using own UI but waiting for debugger to connect
+# - api-version: language tool inside the IDE should use matched version. (e.g. Vscode Go uses v2)
+ENTRYPOINT ["/bin/dlv", "--listen=:2345", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "/app/server", "--continue"]
+
+
