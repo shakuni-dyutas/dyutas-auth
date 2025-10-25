@@ -1,0 +1,19 @@
+post:
+  summary: Refresh the user authentication state
+  description: Validates the refresh token in cookie, revokes it, and returns a new access token in payload.
+  operationId: RefreshAuthentication
+  tags:
+    - authentication
+  responses:
+    201:
+      description: successfully refreshed the authentication state. access token in payload.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/RefreshAuthResponseDTO"
+    401:
+      description: unauthenticated.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorsDTO"

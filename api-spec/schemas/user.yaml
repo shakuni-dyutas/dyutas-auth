@@ -1,0 +1,19 @@
+type: object
+required:
+  - user_id
+  - email
+  - nickname
+  - profileImageUrl
+properties:
+  user_id:
+    type: string
+    description: user id
+  email:
+    type: string
+    description: user email
+  nickname:
+    type: string
+    description: user nickname
+  profileImageUrl:
+    type: string
+    description: user profile image url

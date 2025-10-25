@@ -1,0 +1,41 @@
+post:
+  summary: Google OAuth sign-in
+  description: Takes google auth code and validates it. If valid, returns dyutas access token in payload and refresh token in cookie.
+  operationId: GoogleSignIn
+  tags:
+    - sign-in
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "#/components/schemas/GoogleSignInRequestDTO"
+        examples:
+          default:
+            value:
+              code: "google-auth-code"
+  responses:
+    200:
+      description: successfully signed in. access token in payload and refresh token in cookie.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GoogleSignInResponseDTO"
+    201:
+      description: successfully signed up. access token in payload and refresh token in cookie.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GoogleSignInResponseDTO"
+    400:
+      description: invalid request body.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorsDTO"
+    401:
+      description: unauthenticated.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorsDTO"

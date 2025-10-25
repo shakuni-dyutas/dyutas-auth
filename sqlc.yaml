@@ -1,0 +1,27 @@
+version: "2"
+cloud:
+  organization: ""
+  project: ""
+  hostname: ""
+servers: []
+sql:
+  - name: "dyutas_auth"
+    engine: "postgresql"
+    database:
+      uri: "postgres://postgres:${AUTH_RDB_PASSWORD}@localhost:${AUTH_RDB_PORT}/${AUTH_RDB_DB}"
+    queries:
+      - "internal/db/user_queries.sql"
+      - "internal/db/token_queries.sql"
+    schema:
+      - "internal/db/user_schema.sql"
+      - "internal/db/token_schema.sql"
+    gen:
+      go:
+        package: "db"
+        out: "internal/db"
+        sql_package: database/sql
+overrides:
+  go: null
+plugins: []
+rules: []
+options: {}

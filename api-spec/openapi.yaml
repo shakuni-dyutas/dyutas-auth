@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: Dyutas Auth API
+  description: Auth service for Dyutas
+  version: 1.0.0
+  contact:
+    name: Shakuni
+
+servers:
+  - url: https://local-api.dyutas.com/auth
+    description: local dev server
+
+tags:
+  - name: sign-in
+    description: sign-in operations
+
+paths:
+  /v1/signin/google:
+    $ref: "./paths/google_signin.yaml"
+  /refresh:
+    $ref: "./paths/refresh.yaml"
+  /signout:
+    $ref: "./paths/signout.yaml"
+
+components:
+  schemas:
+    GoogleSignInRequestDTO:
+      $ref: ./schemas/google_signin_req.yaml
+    GoogleSignInResponseDTO:
+      $ref: ./schemas/google_signin_resp.yaml
+    RefreshAuthResponseDTO:
+      $ref: ./schemas/refresh_auth_resp.yaml
+    UserDTO:
+      $ref: ./schemas/user.yaml
+    ErrorsDTO:
+      $ref: ./schemas/errors.yaml
