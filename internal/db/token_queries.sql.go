@@ -7,8 +7,8 @@ package db
 
 import (
 	"context"
-	"database/sql"
-	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const cleanupRefreshTokensExpiredBefore = `-- name: CleanupRefreshTokensExpiredBefore :exec
@@ -16,8 +16,8 @@ DELETE FROM auth.user_refresh_tokens
 WHERE expires_at < COALESCE($1, NOW())
 `
 
-func (q *Queries) CleanupRefreshTokensExpiredBefore(ctx context.Context, expiresAt time.Time) error {
-	_, err := q.db.ExecContext(ctx, cleanupRefreshTokensExpiredBefore, expiresAt)
+func (q *Queries) CleanupRefreshTokensExpiredBefore(ctx context.Context, expiresAt pgtype.Timestamptz) error {
+	_, err := q.db.Exec(ctx, cleanupRefreshTokensExpiredBefore, expiresAt)
 	return err
 }
 
@@ -35,12 +35,12 @@ INSERT INTO auth.user_refresh_tokens (
 type CreateRefreshTokenParams struct {
 	UserID    int64
 	TokenHash string
-	CreatedAt time.Time
-	ExpiresAt time.Time
+	CreatedAt pgtype.Timestamptz
+	ExpiresAt pgtype.Timestamptz
 }
 
 func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (AuthUserRefreshToken, error) {
-	row := q.db.QueryRowContext(ctx, createRefreshToken,
+	row := q.db.QueryRow(ctx, createRefreshToken,
 		arg.UserID,
 		arg.TokenHash,
 		arg.CreatedAt,
@@ -70,7 +70,7 @@ type GetUserRefreshTokenByTokenHashParams struct {
 }
 
 func (q *Queries) GetUserRefreshTokenByTokenHash(ctx context.Context, arg GetUserRefreshTokenByTokenHashParams) (AuthUserRefreshToken, error) {
-	row := q.db.QueryRowContext(ctx, getUserRefreshTokenByTokenHash, arg.UserID, arg.TokenHash)
+	row := q.db.QueryRow(ctx, getUserRefreshTokenByTokenHash, arg.UserID, arg.TokenHash)
 	var i AuthUserRefreshToken
 	err := row.Scan(
 		&i.ID,
@@ -92,11 +92,11 @@ ORDER BY expires_at DESC
 
 type GetUserRefreshTokensExpiresAfterParams struct {
 	UserID    int64
-	ExpiresAt time.Time
+	ExpiresAt pgtype.Timestamptz
 }
 
 func (q *Queries) GetUserRefreshTokensExpiresAfter(ctx context.Context, arg GetUserRefreshTokensExpiresAfterParams) ([]AuthUserRefreshToken, error) {
-	rows, err := q.db.QueryContext(ctx, getUserRefreshTokensExpiresAfter, arg.UserID, arg.ExpiresAt)
+	rows, err := q.db.Query(ctx, getUserRefreshTokensExpiresAfter, arg.UserID, arg.ExpiresAt)
 	if err != nil {
 		return nil, err
 	}
@@ -116,9 +116,6 @@ func (q *Queries) GetUserRefreshTokensExpiresAfter(ctx context.Context, arg GetU
 		}
 		items = append(items, i)
 	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -133,11 +130,11 @@ WHERE user_id = $1 AND expires_at > COALESCE($2, NOW())
 
 type RevokeUserAllRefreshTokensAfterParams struct {
 	UserID    int64
-	RevokedAt sql.NullTime
+	RevokedAt pgtype.Timestamptz
 }
 
 func (q *Queries) RevokeUserAllRefreshTokensAfter(ctx context.Context, arg RevokeUserAllRefreshTokensAfterParams) error {
-	_, err := q.db.ExecContext(ctx, revokeUserAllRefreshTokensAfter, arg.UserID, arg.RevokedAt)
+	_, err := q.db.Exec(ctx, revokeUserAllRefreshTokensAfter, arg.UserID, arg.RevokedAt)
 	return err
 }
 
@@ -149,10 +146,10 @@ WHERE token_hash = $1 AND revoked_at IS NULL
 
 type RevokeUserRefreshTokenParams struct {
 	TokenHash string
-	RevokedAt sql.NullTime
+	RevokedAt pgtype.Timestamptz
 }
 
 func (q *Queries) RevokeUserRefreshToken(ctx context.Context, arg RevokeUserRefreshTokenParams) error {
-	_, err := q.db.ExecContext(ctx, revokeUserRefreshToken, arg.TokenHash, arg.RevokedAt)
+	_, err := q.db.Exec(ctx, revokeUserRefreshToken, arg.TokenHash, arg.RevokedAt)
 	return err
 }

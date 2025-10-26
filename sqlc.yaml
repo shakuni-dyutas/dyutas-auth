@@ -8,7 +8,7 @@ sql:
   - name: "dyutas_auth"
     engine: "postgresql"
     database:
-      uri: "postgres://postgres:${AUTH_RDB_PASSWORD}@localhost:${AUTH_RDB_PORT}/${AUTH_RDB_DB}"
+      uri: "postgres://${AUTH_RDB_USER}:${AUTH_RDB_PASSWORD}@localhost:${AUTH_RDB_PORT}/${AUTH_RDB_DB}"
     queries:
       - "internal/db/user_queries.sql"
       - "internal/db/token_queries.sql"
@@ -19,7 +19,7 @@ sql:
       go:
         package: "db"
         out: "internal/db"
-        sql_package: database/sql
+        sql_package: pgx/v5
 overrides:
   go: null
 plugins: []

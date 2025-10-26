@@ -33,3 +33,6 @@ go.work.sum
 
 # tmp
 tmp/
+
+ # Mac
+ .DS_Store

@@ -1,4 +1,5 @@
 include .env
+include $(DYUTAS_ENV_PATH)
 
 .DEFAULT_GOAL := build
 
@@ -7,11 +8,11 @@ og: # api code generation
 .PHONY: og
 
 svt: # sql code vet
-	AUTH_RDB_PASSWORD=$(AUTH_RDB_PASSWORD) AUTH_RDB_PORT=$(AUTH_RDB_PORT) AUTH_RDB_DB=$(AUTH_RDB_DB) sqlc vet
+	source ./dev_env/load_env_vars.sh && sqlc vet
 .PHONY: svt
 
 sg: svt # sql code generation
-	AUTH_RDB_PASSWORD=$(AUTH_RDB_PASSWORD) AUTH_RDB_PORT=$(AUTH_RDB_PORT) AUTH_RDB_DB=$(AUTH_RDB_DB) sqlc generate
+	source ./dev_env/load_env_vars.sh && sqlc generate
 .PHONY: sg
 
 go: # run the app with air for hot-reload. Just use vscode launch task instead of this.

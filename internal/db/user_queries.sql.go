@@ -7,8 +7,8 @@ package db
 
 import (
 	"context"
-	"database/sql"
-	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -28,13 +28,13 @@ type CreateUserParams struct {
 	Code            string
 	GoogleID        string
 	Email           string
-	ProfileImageUrl sql.NullString
-	Username        sql.NullString
-	SignedUpAt      time.Time
+	ProfileImageUrl pgtype.Text
+	Username        pgtype.Text
+	SignedUpAt      pgtype.Timestamptz
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (AuthUser, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
+	row := q.db.QueryRow(ctx, createUser,
 		arg.Code,
 		arg.GoogleID,
 		arg.Email,
@@ -72,14 +72,14 @@ INSERT INTO auth.user_snapshots (
 type CreateUserSnapshotParams struct {
 	UserID          int64
 	Email           string
-	ProfileImageUrl sql.NullString
-	Username        sql.NullString
-	CreatedAt       time.Time
+	ProfileImageUrl pgtype.Text
+	Username        pgtype.Text
+	CreatedAt       pgtype.Timestamptz
 }
 
 // ========== User Snapshots Queries ==========
 func (q *Queries) CreateUserSnapshot(ctx context.Context, arg CreateUserSnapshotParams) (AuthUserSnapshot, error) {
-	row := q.db.QueryRowContext(ctx, createUserSnapshot,
+	row := q.db.QueryRow(ctx, createUserSnapshot,
 		arg.UserID,
 		arg.Email,
 		arg.ProfileImageUrl,
@@ -104,7 +104,7 @@ WHERE code = $1 AND deleted_at IS NULL
 `
 
 func (q *Queries) GetUserByCode(ctx context.Context, code string) (AuthUser, error) {
-	row := q.db.QueryRowContext(ctx, getUserByCode, code)
+	row := q.db.QueryRow(ctx, getUserByCode, code)
 	var i AuthUser
 	err := row.Scan(
 		&i.ID,
@@ -125,7 +125,7 @@ WHERE google_id = $1 AND deleted_at IS NULL
 `
 
 func (q *Queries) GetUserByGoogleID(ctx context.Context, googleID string) (AuthUser, error) {
-	row := q.db.QueryRowContext(ctx, getUserByGoogleID, googleID)
+	row := q.db.QueryRow(ctx, getUserByGoogleID, googleID)
 	var i AuthUser
 	err := row.Scan(
 		&i.ID,
@@ -148,11 +148,11 @@ WHERE code = $1 AND deleted_at IS NULL
 
 type SoftDeleteUserByCodeParams struct {
 	Code      string
-	DeletedAt sql.NullTime
+	DeletedAt pgtype.Timestamptz
 }
 
 func (q *Queries) SoftDeleteUserByCode(ctx context.Context, arg SoftDeleteUserByCodeParams) error {
-	_, err := q.db.ExecContext(ctx, softDeleteUserByCode, arg.Code, arg.DeletedAt)
+	_, err := q.db.Exec(ctx, softDeleteUserByCode, arg.Code, arg.DeletedAt)
 	return err
 }
 
@@ -169,12 +169,12 @@ RETURNING id, code, google_id, email, profile_image_url, username, signed_up_at,
 type UpdateUserProfileByCodeParams struct {
 	Code            string
 	Email           string
-	ProfileImageUrl sql.NullString
-	Username        sql.NullString
+	ProfileImageUrl pgtype.Text
+	Username        pgtype.Text
 }
 
 func (q *Queries) UpdateUserProfileByCode(ctx context.Context, arg UpdateUserProfileByCodeParams) (AuthUser, error) {
-	row := q.db.QueryRowContext(ctx, updateUserProfileByCode,
+	row := q.db.QueryRow(ctx, updateUserProfileByCode,
 		arg.Code,
 		arg.Email,
 		arg.ProfileImageUrl,

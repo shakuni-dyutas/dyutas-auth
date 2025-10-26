@@ -5,8 +5,7 @@
 package db
 
 import (
-	"database/sql"
-	"time"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type AuthUser struct {
@@ -14,26 +13,26 @@ type AuthUser struct {
 	Code            string
 	GoogleID        string
 	Email           string
-	ProfileImageUrl sql.NullString
-	Username        sql.NullString
-	SignedUpAt      time.Time
-	DeletedAt       sql.NullTime
+	ProfileImageUrl pgtype.Text
+	Username        pgtype.Text
+	SignedUpAt      pgtype.Timestamptz
+	DeletedAt       pgtype.Timestamptz
 }
 
 type AuthUserRefreshToken struct {
 	ID        int64
 	UserID    int64
 	TokenHash string
-	CreatedAt time.Time
-	ExpiresAt time.Time
-	RevokedAt sql.NullTime
+	CreatedAt pgtype.Timestamptz
+	ExpiresAt pgtype.Timestamptz
+	RevokedAt pgtype.Timestamptz
 }
 
 type AuthUserSnapshot struct {
 	ID              int64
 	UserID          int64
 	Email           string
-	ProfileImageUrl sql.NullString
-	Username        sql.NullString
-	CreatedAt       time.Time
+	ProfileImageUrl pgtype.Text
+	Username        pgtype.Text
+	CreatedAt       pgtype.Timestamptz
 }

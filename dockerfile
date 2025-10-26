@@ -20,8 +20,8 @@ WORKDIR /app
 
 COPY --from=builder /app/server /app/server
 
-EXPOSE 8080
+EXPOSE ${AUTH_APP_PORT}
 
-ENV PORT=8080
+ENV AUTH_APP_PORT=${AUTH_APP_PORT}
 CMD ["/app/server"]
 
