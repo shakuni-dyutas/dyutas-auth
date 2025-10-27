@@ -13,8 +13,8 @@ sql:
       - "internal/db/user_queries.sql"
       - "internal/db/token_queries.sql"
     schema:
-      - "internal/db/user_schema.sql"
-      - "internal/db/token_schema.sql"
+      - "internal/db/schema/user_schema.sql"
+      - "internal/db/schema/token_schema.sql"
     gen:
       go:
         package: "db"

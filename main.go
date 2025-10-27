@@ -1,23 +1,28 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/shakuni-dyutas/dyutas-auth/internal/db"
+	"github.com/shakuni-dyutas/dyutas-auth/internal/rest"
 )
 
 func main() {
-	var v1 = os.Getenv("AUTH_RDB_PORT")
-	var v2 = os.Getenv("FE_DOCKERFILE_PATH")
-
-	fmt.Println(v1, v2)
 
 	router := gin.Default()
-	router.GET("/auth/dyutas", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "Hello, Shakuni!",
-		})
-	})
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://local.dyutas.com:8010", "https://local-api.dyutas.com:8010"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
+	rest.InitAuthControllerWith(&db.Conn{}, router)
+
 	router.Run(":8020")
 }

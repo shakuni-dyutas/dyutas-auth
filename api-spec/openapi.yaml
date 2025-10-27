@@ -19,8 +19,8 @@ paths:
     $ref: "./paths/google_signin.yaml"
   /refresh:
     $ref: "./paths/refresh.yaml"
-  /signout:
-    $ref: "./paths/signout.yaml"
+  # /signout:
+  #   $ref: "./paths/signout.yaml"
 
 components:
   schemas:

@@ -1,4 +1,4 @@
-package: handler
+package: rest
 generate:
   models: true
   gin-server: true
