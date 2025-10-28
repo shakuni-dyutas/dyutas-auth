@@ -7,7 +7,7 @@ info:
     name: Shakuni
 
 servers:
-  - url: https://local-api.dyutas.com/auth
+  - url: https://local-api.dyutas.com:8010/auth
     description: local dev server
 
 tags:

@@ -22,6 +22,15 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	router.GET("/auth/v1/openapi", func(c *gin.Context) {
+		swagger, err := rest.GetSwagger()
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, swagger)
+	})
+
 	rest.InitAuthControllerWith(&db.Conn{}, router)
 
 	router.Run(":8020")
