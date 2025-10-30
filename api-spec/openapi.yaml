@@ -15,12 +15,12 @@ tags:
     description: sign-in operations
 
 paths:
-  /v1/signin/google:
+  /signin/google:
     $ref: "./paths/google_signin.yaml"
   /refresh:
     $ref: "./paths/refresh.yaml"
-  # /signout:
-  #   $ref: "./paths/signout.yaml"
+  /signout:
+    $ref: "./paths/signout.yaml"
 
 components:
   schemas:

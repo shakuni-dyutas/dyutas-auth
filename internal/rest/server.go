@@ -35,8 +35,8 @@ type ErrorsDTO_Errors_Item struct {
 
 // GoogleSignInRequestDTO defines model for GoogleSignInRequestDTO.
 type GoogleSignInRequestDTO struct {
-	// GoogleAuthCode Google OAuth authorization code
-	GoogleAuthCode string `json:"google_auth_code"`
+	// Code Google auth code
+	Code string `json:"code"`
 }
 
 // GoogleSignInResponseDTO defines model for GoogleSignInResponseDTO.
@@ -167,8 +167,11 @@ type ServerInterface interface {
 	// (POST /refresh)
 	RefreshAuthentication(c *gin.Context)
 	// Google OAuth sign-in
-	// (POST /v1/signin/google)
+	// (POST /signin/google)
 	GoogleSignIn(c *gin.Context)
+	// Revoke the refresh token and remove the cookie
+	// (POST /signout)
+	SignOut(c *gin.Context)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -206,6 +209,19 @@ func (siw *ServerInterfaceWrapper) GoogleSignIn(c *gin.Context) {
 	siw.Handler.GoogleSignIn(c)
 }
 
+// SignOut operation middleware
+func (siw *ServerInterfaceWrapper) SignOut(c *gin.Context) {
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.SignOut(c)
+}
+
 // GinServerOptions provides options for the Gin server.
 type GinServerOptions struct {
 	BaseURL      string
@@ -234,29 +250,30 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	}
 
 	router.POST(options.BaseURL+"/refresh", wrapper.RefreshAuthentication)
-	router.POST(options.BaseURL+"/v1/signin/google", wrapper.GoogleSignIn)
+	router.POST(options.BaseURL+"/signin/google", wrapper.GoogleSignIn)
+	router.POST(options.BaseURL+"/signout", wrapper.SignOut)
 }
 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xXTY/bNhD9KwTbo1byNjkUum27QeGi6AbJJj0EhjGRRjZjidTyw60b6L8XQ1L+kpRN",
-	"FjXaALl5xeFw3uObN9yPvFBNqyRKa3j+kZtijQ34ny+0Vtrc3t/RH61WLWor0C+hX6JfJZpCi9YKJXnO",
-	"a2EsUxWL6wkXFhsfB2UpKAjql0eZrHaYnOUuVInDzD4j82sJx7+gaWvkOZ///vbmt/nt8ue72xc84XbX",
-	"0ldjtZAr3iW8QWNgNZmvXz5OeePsWmnxN1CkP5EJw4TcQi3K4RldwjU+OKGx5Pk7HivsEy/28er9Byws",
-	"1RQ/gNawG+yPzI3t+0WpVY2vxUrO5St8cGjs6OWsfNwSnF0vx8kMmdgdQWUwwHtCR8h2RVFXcfHTDAyO",
-	"fxyLaZU0OAoGigKNuVcblEMcv/5xz0IAsz5iRAHOoKad32useM6/yw56z6LYszcGNZ1+DuX48JhpDMwr",
-	"rDSaNbF5SSyfKG6sqh7UsHkbEPWwAILHwtoIjVIUGwkNTuzbL49sbbWqRI3zBlb4Rk+dHKOYoDDmdD11",
-	"mUtRTqT4jPbsEyS8R3pU+XmhY6xGySwPDvjNGf9zZ+wvJVqPESsp5FLjw9dpjlNwTPt1+mOPRwefDOgv",
-	"AueLLJKihaxUaC1pobD0M7gcf72GjZOC6j+twuvCoN6KAlmlNLvdOQvU0lZYr4rwgfnAm5dznvAtahN2",
-	"X6ezdEZJVYsSWsFz/iydpc/IfsCuPQlZJMrTo4wdMvGWOg4sGmbXyGJ4IIUJ0qnaCEyYxq3aoGHCJgxk",
-	"yTRap6VhwCT+eUIl7WphVysoU+6L017y85Lnx/MNpRWFX+FEdRh2vugfZtc9kSh9ydC2dQzOPhglD8/L",
-	"x/Q2LRh/aadcGOdxVK6udz0VWHpi4KRiZixYTKdxdwl/fgEU0bhGSnfyqEKkCqhbXNOA3h1491D8gBvD",
-	"Q7qDlfFyP72gBWXLttdZMJAs2Mm0qO6BtBKi/FHB4kk4273ehE3ZvAofkr2gyqD4CWaj9kZFOlTb8dOQ",
-	"h35GY39S5e4zbiZacxzAFbjah26hdngYoUPf9pfzZdc6HDbdqf/QCO8GXTL71/U1MiYeaxOKxZIJmT7t",
-	"zrrkIv3+dCSufTqS5xe4k+mej88lFnXN3qty9/+znpNHEHF8JeSR0/RfFqFvUNOA4/m7watXFVCzErcs",
-	"xNArgf4D4GtrW5NnmQ+4glakwULSQjX5j7PrWUbl8W6xP/M8dSyB7c2DJnCc3X153aL7JwAA//9ZBCZ+",
-	"4BAAAA==",
+	"H4sIAAAAAAAC/+xX32/cNgz+VwRtj459WTNguLdsKYYbhqVI0+5hCA6qTfvU2JIjUbfdCv/vAyX5ftlO",
+	"0mCHdUDfEpOiyI8fP+o+8Vw3rVag0PL5J27zFTTC//naGG3s1e01/dMa3YJBCd4E3kR/FWBzI1uUWvE5",
+	"r6VFpksW7QmXCI33E0UhyUnUb/YioXGQHMXOdQHDyD4i87aEw1+iaWvgc7747f3lr4ur5U/XV695wnHT",
+	"0leLRqqKdwlvwFpRTcbrzfshLx2utJF/C/L0NzJpmVRrUctieEeXcAMPThoo+PwPHjPsA99t/fWHj5Aj",
+	"5RQ/CGPEZnA+Ijd27metqxreykot1A08OLA42pxxAMNpJhyuhjBW3nhGxrNofEaZTydpW60sjGYp8hys",
+	"vdX3oIbJ/vL7LQsODL3HSGudBUMnvzVQ8jn/JtsROYsszt5ZMHT7cfr7l8dIY8XcQGnArogRp6zlkeTG",
+	"suqLGk5lI2Q9TIDKY8E2AqOS+b0SDUyc25pHjrZGl7KGRSMqeGembo5eTJIbc6aeauZSFhMhnjF3fYCE",
+	"95XuZX6c6BiqkTLLnbR9lbz/XPL6pgR9WlpZKamWBh6+MNWbytO2/0/h6+sxQQCXBNFpyvks7SNvqUod",
+	"+q1Q5Eh/Bvnib1fi3ilJ+R9mQfRmFsxa5sBKbdjVxqGgWUWJngnhA/OOl28WPOFrMDacPk9n6YyC6haU",
+	"aCWf81fpLH1FuiJw5UHIIlAeHm1xiMR7GiWBYBmugEX3AAqTNHP6XkLCDKz1PVgmMWFCFcwAOqMsE0zB",
+	"nwdQ0qlWbGotipT75Iwf30XB5/uLCxTK3Fs4QR22mE/6u9l5DyQon7Jo2zo6Zx+tVrsH4VN8myaMb9oh",
+	"Ftb5OkpX15seCig8MOIgY2ZRIKTTdXcJvzhBFVGRRlJ3ai9DoAxoWlzTCLPZ4e5L8ZtrrB7inaisp/th",
+	"g+4oWhbUIwtaMs2oW0FEqY4EzrNmvSWbxJQtyvAh2bKpCHSfgDUSb5ShQ6rtP/h4GGaw+KMuNs9oS9Ti",
+	"uFZL4Wrvuha1g52oD4Xad+bzejpcId2h+NBi7gYjMvvXyTWyI56aEfKFgkmVvqxnXXKSYX95Ja59eSUX",
+	"J+jJ9MDHRxCLvGYfdLH58nQnPnOuw6aTlTqT6jkyox1OC8xN3EWPLKzYrEavo9+USpA+XDscrqCL4b1j",
+	"hNEOPerfh+Yf9wjBKFH7HU+/dQjGoTRTNSPF7ErYq+BR8Ciuv4nsg98DOhc1K2Ads6FnFv024ivE1s6z",
+	"zDuciVamQYbTXDfzH2bns4xu4t3d9uoBMKGxbAstPWHi46dvenfX/RMAAP//GZgkHdMRAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

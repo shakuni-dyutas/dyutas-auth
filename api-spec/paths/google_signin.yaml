@@ -3,7 +3,7 @@ post:
   description: Takes google auth code and validates it. If valid, returns dyutas access token in payload and refresh token in cookie.
   operationId: GoogleSignIn
   tags:
-    - sign-in
+    - authentication
   requestBody:
     required: true
     content:

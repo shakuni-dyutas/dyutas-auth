@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -31,7 +32,18 @@ func main() {
 		c.JSON(200, swagger)
 	})
 
-	rest.InitAuthControllerWith(&db.Conn{}, router)
+	dbConn, err := db.NewRDBConnectionPool(db.ConnectionConfig{
+		User: os.Getenv("AUTH_RDB_USER"),
+		Pw:   os.Getenv("AUTH_RDB_PASSWORD"),
+		Host: os.Getenv("AUTH_RDB_HOST"),
+		Port: os.Getenv("AUTH_RDB_PORT"),
+		DB:   os.Getenv("AUTH_RDB_DB"),
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	rest.InitAuthControllerWith(dbConn, router)
 
 	router.Run(":8020")
 }

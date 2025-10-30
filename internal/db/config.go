@@ -27,7 +27,7 @@ func NewRDBConnectionPool(cfg ConnectionConfig) (*Conn, error) {
 
 	var newConn = &Conn{
 		pool: newPool,
-		qrs:  newQueries,
+		Qrs:  newQueries,
 	}
 
 	return newConn, nil
@@ -39,12 +39,12 @@ func composeConnectionStringFrom(cfg ConnectionConfig) string {
 
 type Conn struct {
 	pool *pgxpool.Pool
-	qrs  *Queries
+	Qrs  *Queries
 }
 
 type Trx struct {
 	tx  pgx.Tx
-	qrs *Queries
+	Qrs *Queries
 }
 
 func (c *Conn) BeginTx(ctx context.Context) (*Trx, error) {
@@ -53,9 +53,9 @@ func (c *Conn) BeginTx(ctx context.Context) (*Trx, error) {
 		return nil, err
 	}
 
-	var trxQrs = c.qrs.WithTx(tx)
+	var trxQrs = c.Qrs.WithTx(tx)
 
-	var newTrx = &Trx{tx: tx, qrs: trxQrs}
+	var newTrx = &Trx{tx: tx, Qrs: trxQrs}
 
 	return newTrx, nil
 }

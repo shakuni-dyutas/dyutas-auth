@@ -16,12 +16,11 @@ RUN go build \
 # --- runtime ---
 FROM debian:bookworm-slim
 
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY --from=builder /app/server /app/server
 
-EXPOSE ${AUTH_APP_PORT}
-
-ENV AUTH_APP_PORT=${AUTH_APP_PORT}
 CMD ["/app/server"]
 

@@ -1,0 +1,11 @@
+post:
+  summary: Revoke the refresh token and remove the cookie
+  description: Revokes the refresh token in cookie and removes the cookie.
+  operationId: SignOut
+  tags:
+    - authentication
+  responses:
+    204:
+      description: successfully signed out.
+    500:
+      description: internal server error.
