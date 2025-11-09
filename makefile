@@ -3,6 +3,10 @@ include $(DYUTAS_ENV_PATH)
 
 .DEFAULT_GOAL := build
 
+dg: # generate package dependency graph
+	./dev_env/godep_graph.sh
+.PHONY: dg
+
 og: # api code generation
 	oapi-codegen -config api-spec/oapi-codegen.yaml api-spec/openapi.yaml
 .PHONY: og
@@ -33,5 +37,5 @@ vet: fmt
 .PHONY: vet
 
 build: vet
-	go build
+	go build -o ./tmp/dyutas-auth ./cmd/dyutas-auth
 .PHONY: build

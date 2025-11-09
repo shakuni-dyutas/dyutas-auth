@@ -23,7 +23,7 @@ COPY . ./
 
 RUN go build \
     -gcflags="all=-N -l" \
-    -o /app/server .
+    -o /app/server ./cmd/dyutas-auth
 
 RUN go get -u github.com/go-delve/delve/cmd/dlv
 

@@ -11,7 +11,7 @@ COPY . ./
 
 RUN go build \
     -ldflags="-s -w" \
-    -o /app/server .
+    -o /app/server ./cmd/dyutas-auth
 
 # --- runtime ---
 FROM debian:bookworm-slim

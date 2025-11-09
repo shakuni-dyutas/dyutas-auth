@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   bin = "./dev_env/dyutas_air_bin.sh"
-  cmd = "go build -o ./tmp/dyutas-auth ."
+  cmd = "go build -o ./tmp/dyutas-auth ./cmd/dyutas-auth"
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []

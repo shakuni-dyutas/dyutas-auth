@@ -11,9 +11,11 @@ properties:
   email:
     type: string
     description: user email
-  nickname:
+  username:
     type: string
-    description: user nickname
+    nullable: true
+    description: user name in app
   profileImageUrl:
     type: string
+    nullable: true
     description: user profile image url
