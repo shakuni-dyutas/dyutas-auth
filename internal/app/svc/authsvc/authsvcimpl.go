@@ -142,3 +142,44 @@ func (svc *AuthServiceImpl) SignOut(ctx context.Context, refreshTokenJWT string)
 
 	return nil
 }
+
+func (svc *AuthServiceImpl) GetSelfInfo(ctx context.Context, accessToken string) (*AuthUserInfo, error) {
+	_, err := helper.Hash(accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	accessTokenJWT, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
+		return svc.appJwtKey, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	tokenMapClaims, ok := accessTokenJWT.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("invalid access token claims")
+	}
+
+	accessTokenClaims := AccessTokenClaims{
+		Rhs: tokenMapClaims["rhs"].(string),
+		Ucd: tokenMapClaims["ucd"].(string),
+		Exp: tokenMapClaims["exp"].(float64),
+	}
+
+	user, err := svc.userRepo.GetUserByCode(ctx, accessTokenClaims.Ucd)
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil {
+		return nil, errors.New("user not found")
+	}
+
+	return &AuthUserInfo{
+		Code:            user.Code,
+		Email:           user.Email,
+		Username:        user.Username,
+		ProfileImageURL: user.ProfileImageURL,
+	}, nil
+}

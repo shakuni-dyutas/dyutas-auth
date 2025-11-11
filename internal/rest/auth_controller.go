@@ -3,6 +3,7 @@ package rest
 import (
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/shakuni-dyutas/dyutas-auth/internal/app/svc/authsvc"
@@ -29,7 +30,7 @@ type AuthController struct {
 
 // TODO domain should be injected
 const dyutasRefreshTokenCookieDomain = "local-api.dyutas.com"
-const dyutasRefreshTokenCookiePath = "/"
+const dyutasRefreshTokenCookiePath = "/auth/refresh" // TODO remove hardcoded path
 const dyutasRefreshTokenCookieName = "rtk"
 const dyutasRefreshTokenCookieTTL = authsvc.RefreshTokenTTL
 
@@ -57,7 +58,7 @@ func (ac *AuthController) GoogleSignIn(ctx *gin.Context) {
 		User: UserDTO{
 			Email:           signingUserInfo.Email,
 			Username:        signingUserInfo.Username,
-			ProfileImageUrl: nil,
+			ProfileImageURL: nil,
 			UserId:          signingUserInfo.Code,
 		},
 	}
@@ -102,4 +103,24 @@ func (ac *AuthController) SignOut(ctx *gin.Context) {
 
 	ctx.SetCookie(dyutasRefreshTokenCookieName, "", -1, dyutasRefreshTokenCookiePath, dyutasRefreshTokenCookieDomain, true, true)
 	ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (ac *AuthController) GetSelfInfo(ctx *gin.Context) {
+	authorizationHeader := ctx.GetHeader("Authorization")
+	accessToken := strings.TrimPrefix(authorizationHeader, "Bearer ")
+
+	selfInfo, err := ac.authSvc.GetSelfInfo(ctx, accessToken)
+	if err != nil {
+		ac.logger.Error("GetSelfInfo: Failed to get self info", "error", err)
+
+		ctx.JSON(400, gin.H{"error": "GetSelfInfo: Failed to get self info - " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, SelfDTO{
+		UserId:          selfInfo.Code,
+		Email:           selfInfo.Email,
+		Username:        selfInfo.Username,
+		ProfileImageURL: selfInfo.ProfileImageURL,
+	})
 }

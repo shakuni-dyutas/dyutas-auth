@@ -7,4 +7,4 @@ properties:
     type: string
     description: JWT access token
   user:
-    $ref: "./user.yaml"
+    $ref: "./self.yaml"

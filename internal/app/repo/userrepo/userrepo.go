@@ -10,4 +10,5 @@ import (
 type UserRepo interface {
 	CreateUserByGoogleId(ctx context.Context, googleIdSub string, user *user.User) (*user.User, error)
 	GetUserByGoogleId(ctx context.Context, googleSub string) (*user.User, error)
+	GetUserByCode(ctx context.Context, code string) (*user.User, error)
 }

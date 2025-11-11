@@ -16,6 +16,8 @@ type AuthService interface {
 	// SignOut revokes the refresh token.
 	// Cookie removal must be handled by HTTP layer.
 	SignOut(ctx context.Context, refreshToken string) error
+	// GetSelfInfo validates the access token and returns the user info including sensitive data.
+	GetSelfInfo(ctx context.Context, accessToken string) (*AuthUserInfo, error)
 }
 
 const RefreshTokenTTL = time.Hour * 24 * 6

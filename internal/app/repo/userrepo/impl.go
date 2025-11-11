@@ -55,3 +55,21 @@ func (ur *UserRepoImpl) GetUserByGoogleId(ctx context.Context, googleSub string)
 
 	return userEntity, nil
 }
+
+func (ur *UserRepoImpl) GetUserByCode(ctx context.Context, code string) (*user.User, error) {
+	userRecord, err := ur.db.Qrs.GetUserByCode(ctx, code)
+	if err == pgx.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	var usernameColumn *string
+	if userRecord.Username.Valid {
+		usernameColumn = &userRecord.Username.String
+	}
+
+	userEntity := user.From(userRecord.ID, userRecord.Code, userRecord.Email, nil, usernameColumn, userRecord.SignedUpAt.Time)
+
+	return userEntity, nil
+}

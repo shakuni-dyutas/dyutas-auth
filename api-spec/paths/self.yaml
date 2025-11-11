@@ -1,0 +1,27 @@
+get:
+  summary: Get sensitive user info of access token owner
+  description: Returns current user's info including sensitive data
+  operationId: GetSelfInfo
+  tags:
+    - auth
+  security:
+    - Authorization: []
+  responses:
+    200:
+      description: successfully retrieved current user's info.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SelfDTO"
+    401:
+      description: unauthenticated.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorsDTO"
+    500:
+      description: internal server error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorsDTO"

@@ -21,8 +21,16 @@ paths:
     $ref: "./paths/refresh.yaml"
   /signout:
     $ref: "./paths/signout.yaml"
+  /self:
+    $ref: "./paths/self.yaml"
 
 components:
+  securitySchemes:
+    Authorization:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: access token
   schemas:
     GoogleSignInRequestDTO:
       $ref: ./schemas/google_signin_req.yaml
@@ -32,5 +40,7 @@ components:
       $ref: ./schemas/refresh_auth_resp.yaml
     UserDTO:
       $ref: ./schemas/user.yaml
+    SelfDTO:
+      $ref: ./schemas/self.yaml
     ErrorsDTO:
       $ref: ./schemas/errors.yaml

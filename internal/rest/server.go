@@ -17,6 +17,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	AuthorizationScopes = "Authorization.Scopes"
+)
+
 // ErrorsDTO defines model for ErrorsDTO.
 type ErrorsDTO struct {
 	// Errors list of errors
@@ -47,11 +51,11 @@ type GoogleSignInResponseDTO struct {
 		// Email user email
 		Email string `json:"email"`
 
-		// ProfileImageUrl user profile image url
-		ProfileImageUrl *string `json:"profileImageUrl"`
+		// ProfileImageURL user profile image url
+		ProfileImageURL *string `json:"profileImageURL"`
 
 		// UserId user id
-		UserId string `json:"user_id"`
+		UserId string `json:"userId"`
 
 		// Username user name in app
 		Username *string `json:"username"`
@@ -64,16 +68,31 @@ type RefreshAuthResponseDTO struct {
 	AccessToken string `json:"accessToken"`
 }
 
+// SelfDTO defines model for SelfDTO.
+type SelfDTO struct {
+	// Email user email
+	Email string `json:"email"`
+
+	// ProfileImageURL user profile image url
+	ProfileImageURL *string `json:"profileImageURL"`
+
+	// UserId user id
+	UserId string `json:"userId"`
+
+	// Username user name in app
+	Username *string `json:"username"`
+}
+
 // UserDTO defines model for UserDTO.
 type UserDTO struct {
 	// Email user email
 	Email string `json:"email"`
 
-	// ProfileImageUrl user profile image url
-	ProfileImageUrl *string `json:"profileImageUrl"`
+	// ProfileImageURL user profile image url
+	ProfileImageURL *string `json:"profileImageURL"`
 
 	// UserId user id
-	UserId string `json:"user_id"`
+	UserId string `json:"userId"`
 
 	// Username user name in app
 	Username *string `json:"username"`
@@ -166,6 +185,9 @@ type ServerInterface interface {
 	// Refresh the user authentication state
 	// (POST /refresh)
 	RefreshAuthentication(c *gin.Context)
+	// Get sensitive user info of access token owner
+	// (GET /self)
+	GetSelfInfo(c *gin.Context)
 	// Google OAuth sign-in
 	// (POST /signin/google)
 	GoogleSignIn(c *gin.Context)
@@ -194,6 +216,21 @@ func (siw *ServerInterfaceWrapper) RefreshAuthentication(c *gin.Context) {
 	}
 
 	siw.Handler.RefreshAuthentication(c)
+}
+
+// GetSelfInfo operation middleware
+func (siw *ServerInterfaceWrapper) GetSelfInfo(c *gin.Context) {
+
+	c.Set(AuthorizationScopes, []string{})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.GetSelfInfo(c)
 }
 
 // GoogleSignIn operation middleware
@@ -250,6 +287,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	}
 
 	router.POST(options.BaseURL+"/refresh", wrapper.RefreshAuthentication)
+	router.GET(options.BaseURL+"/self", wrapper.GetSelfInfo)
 	router.POST(options.BaseURL+"/signin/google", wrapper.GoogleSignIn)
 	router.POST(options.BaseURL+"/signout", wrapper.SignOut)
 }
@@ -257,24 +295,27 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xXTW/jNhD9KwTboyI53RQofEubReGiaBbZ7PZQBAYjjWWuJZLhh1t3of9eDEn5i1KS",
-	"DWo0BfZma4bDmTdv3kifaSlbJQUIa+j0MzXlElrmf77VWmpzdXuNf5SWCrTl4E3gTfirAlNqriyXgk5p",
-	"w40lckGiPaPcQuv9WFVxdGLNu71IVjvIjmKXsoI0so9IvC2j8BdrVQN0Sme/fbz8dXY1/+n66i3NqN0o",
-	"fGqs5qKmXUZbMIbVo/F6837IS2eXUvO/GXr6Gwk3hIs1a3iV3tFlVMOD4xoqOv2Dxgz7wHdbf3n/CUqL",
-	"OcUHTGu2Sc5H5IbO/Sxl3cB7XouZuIEHB8YONmcYwHCaMGeXKYy1N56h8Swan1Hm00kaJYWBwSxZWYIx",
-	"t3IFIk32l99vSXAg1nsMtNYZ0HjyWw0LOqXfFDsiF5HFxQcDGm8/Tn//8hhpqJgbWGgwS2TEKWt5JLmh",
-	"rPqi0qlsGW/SBLA8EmwDMCotF7yBWctq+KDHjkcvwtGNOI2hhGsado/8CWM82KE5r0ZCDg1TOCNYCyOH",
-	"0ES4IEyppzM4wrVPJ6M9GIKXK39ZCsMQ8JFV8536fVXF/1wV+6YECZsbXgsu5hoeXpkwjuVp1P9TG/t6",
-	"dNDIOUJ0mnK+SB7Rm4uFDP0WlpUWfwZJoe+XbOUEx/wPs0B6EwN6zUsgC6nJ1cZZhrNqufVMCA+Id7x8",
-	"N6MZXYM24fR5PsknGFQqEExxOqVv8kn+BnWF2aUHoYhAeXiksSkSH3GUmAVD7BJIdA+goOSVUq44ZETD",
-	"Wq7AEG4zwkRFNFinhSGMCPjzAEo8pdimkazKqU9O+/GdVXS6v9tAWF56C0Wow6LzSX83Oe+BBOFTZko1",
-	"0bn4ZKTYvTM+xbdxwvimHWJhnK9j4Zpm00MBlQeGHWRMjGUW8vG6u4xenKCKqEgDqTuxlyFgBjgtrm2Z",
-	"3uxw96X4lTZUD/KO1cbT/bBBdxitCOpRBC0ZZ9QtQ6LURwLnWbPeko3bnMwW4UG2ZVMV6D4CayTeIENT",
-	"qu2/E9IwzGDsj7LaPKMtUYvjWl0w13jXNWsc7EQ9FWrfmS/rabpCukPxwcXcJSMy+dfJNbAjnpoR9IWK",
-	"cJG/rGdddpJhf3klTr28kosT9GR84ONLEIm8Jvey2rw+3YmvOddh0/FanHHxHJmRzo4LzE3cRY8srNis",
-	"Vq6j35hKoD5cO5uuoIv03iHCSGc96t+H5h/3yOJ3ReN3PH4OIYypNGM1A8XsStir4FHwMK6/Ce3J94As",
-	"WUMqWMds8DULv7zo0lplpkXhHc6Y4nmQ4byU7fSHyfmkwJtod7e9OgEmNJZsocVXmPjy0ze9u+v+CQAA",
-	"//8AtYhm9hEAAA==",
+	"H4sIAAAAAAAC/+xYUW/bNhD+KwQ3YC+K7K4dMPitW7rAQ7EUSdo9BEHASCeZjUQq5NGdV/i/D0dSsWxJ",
+	"cRosWQbkzRWPvLvv7r7vmq8803WjFSi0fPaV22wBtfA/3xmjjT08O6Z/NEY3YFCCPwJ/RL9ysJmRDUqt",
+	"+IxX0iLTBYvnCZcItbcTeS7JSFQfOi+hcZDsvJ3pHPov+xeZP0s4/CXqpgI+4/M/Pr19Pz+8/PX48B1P",
+	"OK4a+mrRSFXydcJrsFaUo++1x90n3zpcaCP/FmTpPTJpmVRLUcm872OdcAM3ThrI+eycxwjbhy9u7fXV",
+	"Z8iQYoofhDFi1bsfkRu6d6R1WcGpLNVcncCNA4uDxRkGMNxmwuGiD2PpDw/o8CAe3iPN/UHaRisLg1GK",
+	"LANrz/Q1qH6wv/95xoIBQ28xUFpnwdDN7w0UfMa/m2waeRK7eHIKVUHed8PvOo8vDSVzAoUBu6COeMxc",
+	"7ghuKKo2qf5U1kJW/QAoPRbOBmBsjC5kBfNalPDx5P3I9WjFJJkxZ+gp5apKXFH/hDEerNA8H3lxaJbC",
+	"FSVqGLlER0wqJppmfwA7sMZoEt5CceurD8IQ7B8tmBfYnxz2OMqXG8l5kaL/XIraogTduLSyVFJdGrh5",
+	"Zmo0Fqdt/p+C1OZjgjBdEkSPk843alIbmIWqeGHIp2RIAh8yZySuTqkIAfEt5qAPVyAMmN+0qQWGBuDJ",
+	"TiI7DeFLSp7C1Q0oC8SGr8mxVIUOM65QZEg/A0b8dCGunZKE3LYTCoxZMEuZASu0YYcrh4L4GSX66Q8f",
+	"mDd8+2HOE74EY8PtV+k0ndKjugElGsln/HU6TV8TUgIXPvVJHA7fhtpiv2KfiD4FgmW4ABbNQ95Uw0zr",
+	"awkJM7DU12CZxIQJlTMD6IyyTDAFX7bGh241YlVpkafcB2c88NRj3SUSFMoslIRaIGyUPugfp69aIEH5",
+	"kEXTVNF48tmGIoYp28cx4yThi7aNhXU+j8JV1aqFAnIPjNiKmFkUCOl43uuEv3mELKIKDYTuVCdCoAho",
+	"FlxdC7Pa4O5T8TM6lA/1nSitp7jtAl3Qa5OWz0oY6KOT2BCZMwYUei8/kD4XmkmVVS6XqmQWlJUol8By",
+	"gaLXHkeAJApzGqVeU0z/dTh9Qvv7AI2EJeRDqT2LSif8p0cAZzwCqZA4ufLURapFlukW+/LZeY93zy/W",
+	"F92ePALs9EOQG+oWXWzPlf6iAuN2erPtSL/DTMJGM85xZ4Koq9xZszyPLW/pT2LK5kX4kNzyWx4IeGTQ",
+	"IxUOcmaf/Lp/DuBB9sDiLzpf3aN4cSOMy30hXOVNl6JysFkt++uir9+3Vb6/yK63ZZqEfP0E8zmwqe6b",
+	"VrKFnEmVPqxm6+RR5Ofhmbjm4Zm8eWJa8LPDYl+zK52vnp8Sxv9sHYfdS5bqQKq9widLpR2OE8xJ3I7u",
+	"WKFisWq9jHZjLEH8cOywr39v+n6HGkY77GrC/am7syxQNgPJbFLoZHAneF4SyJP1irDzVwmdiYrlsIzR",
+	"0LZvqrhU29lk4g0ORCPTQMNppuvZz9NX04nXAJKT6LoHTCgsu4WWluq4jrdFX1+s/wkAAP//9RwLbfEX",
+	"AAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
