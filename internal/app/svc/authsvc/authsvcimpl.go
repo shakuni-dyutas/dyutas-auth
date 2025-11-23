@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/shakuni-dyutas/dyutas-auth/internal/app"
 	"github.com/shakuni-dyutas/dyutas-auth/internal/app/adpt/googleadpt"
 	"github.com/shakuni-dyutas/dyutas-auth/internal/app/repo/userrepo"
 	"github.com/shakuni-dyutas/dyutas-auth/internal/helper"
@@ -33,29 +34,49 @@ type AuthServiceImpl struct {
 func (svc *AuthServiceImpl) SignWithGoogle(ctx context.Context, googleAuthCode string) (*SignResult, error) {
 	googleUserInfo, err := svc.googleAdpt.VerifyAuthCode(ctx, googleAuthCode)
 	if err != nil {
-		return nil, err // TODO app err
+		return nil, &app.AppError{
+			Code:    app.UnauthenticatedError,
+			Message: "failed to verify Google auth code",
+			Err:     err,
+		}
 	}
 
 	existingUser, err := svc.userRepo.GetUserByGoogleId(ctx, googleUserInfo.Sub)
 	if err != nil {
-		return nil, err // TODO app err
+		return nil, &app.AppError{
+			Code:    app.InternalServerError,
+			Message: "failed to get user by Google ID",
+			Err:     err,
+		}
 	}
 
 	if existingUser == nil {
 		existingUser, err = svc.registerNewUserByGoogleId(ctx, googleUserInfo)
 		if err != nil {
-			return nil, err // TODO app err
+			return nil, &app.AppError{
+				Code:    app.InternalServerError,
+				Message: "failed to register new user by Google ID",
+				Err:     err,
+			}
 		}
 	}
 
 	refreshToken, refreshTokenHash, err := svc.signNewRefreshTokenFor(ctx, existingUser.Code)
 	if err != nil {
-		return nil, err // TODO app err
+		return nil, &app.AppError{
+			Code:    app.InternalServerError,
+			Message: "failed to sign new refresh token",
+			Err:     err,
+		}
 	}
 
 	accessToken, err := svc.signNewAccessTokenFor(ctx, existingUser.Code, refreshTokenHash)
 	if err != nil {
-		return nil, err // TODO app err
+		return nil, &app.AppError{
+			Code:    app.InternalServerError,
+			Message: "failed to sign new access token",
+			Err:     err,
+		}
 	}
 
 	signResult := &SignResult{

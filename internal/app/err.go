@@ -1,11 +1,21 @@
 package app
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type AppErrorCode string
 
 const (
-	AppErrorCodeUnknown AppErrorCode = "UNKNOWN"
+	// client errors
+	BadRequestError AppErrorCode = "BAD_REQUEST"
+
+	// system errors
+	InternalServerError AppErrorCode = "INTERNAL_SERVER_ERROR"
+
+	// auth errors
+	UnauthenticatedError AppErrorCode = "UNAUTHENTICATED"
+	UnauthorizedError    AppErrorCode = "UNAUTHORIZED"
 )
 
 type AppError struct {

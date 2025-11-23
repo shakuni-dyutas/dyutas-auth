@@ -16,4 +16,16 @@ post:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorsDTO"
+            allOf:
+              - $ref: "#/components/schemas/ErrorDTO"
+              - type: object
+                properties:
+                  errorCode:
+                    type: string
+                    example: "UNAUTHENTICATED"
+    500:
+      description: internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDTO"

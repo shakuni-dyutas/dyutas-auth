@@ -1,0 +1,16 @@
+type: object
+required:
+  - message
+properties:
+  errorCode:
+    type: string
+    description: error code
+    example: "INVALID_BLAH_BLAH"
+  message:
+    type: string
+    description: error message
+    example: "blah blah is invalid"
+  data:
+    type: object
+    description: error data
+    additionalProperties: true

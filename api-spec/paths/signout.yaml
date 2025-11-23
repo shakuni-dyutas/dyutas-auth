@@ -6,6 +6,16 @@ post:
     - authentication
   responses:
     204:
-      description: successfully signed out.
+      description: successfully signed out
+    400:
+      description: invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDTO"
     500:
-      description: internal server error.
+      description: internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDTO"

@@ -28,14 +28,26 @@ post:
           schema:
             $ref: "#/components/schemas/GoogleSignInResponseDTO"
     400:
-      description: invalid request body.
+      description: invalid request
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorsDTO"
+            $ref: "#/components/schemas/ErrorDTO"
     401:
-      description: unauthenticated.
+      description: unauthenticated
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorsDTO"
+            allOf:
+              - $ref: "#/components/schemas/ErrorDTO"
+              - type: object
+                properties:
+                  errorCode:
+                    type: string
+                    example: "UNAUTHENTICATED"
+    500:
+      description: internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorDTO"

@@ -8,20 +8,20 @@ get:
     - Authorization: []
   responses:
     200:
-      description: successfully retrieved current user's info.
+      description: successfully retrieved current user's info
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/SelfDTO"
-    401:
-      description: unauthenticated.
+    400:
+      description: invalid request
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorsDTO"
+            $ref: "#/components/schemas/ErrorDTO"
     500:
-      description: internal server error.
+      description: internal server error
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorsDTO"
+            $ref: "#/components/schemas/ErrorDTO"

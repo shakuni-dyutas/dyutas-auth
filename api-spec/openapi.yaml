@@ -42,5 +42,5 @@ components:
       $ref: ./schemas/user.yaml
     SelfDTO:
       $ref: ./schemas/self.yaml
-    ErrorsDTO:
-      $ref: ./schemas/errors.yaml
+    ErrorDTO:
+      $ref: ./schemas/error.yaml
