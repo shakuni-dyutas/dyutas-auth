@@ -3,6 +3,10 @@ include $(DYUTAS_ENV_PATH)
 
 .DEFAULT_GOAL := build
 
+grpc: # generate grpc code
+	protoc --go_out=./internal --go-grpc_out=./internal ./grpc-spec/match-judge.proto
+.PHONY: grpc
+
 dg: # generate package dependency graph
 	./dev_env/godep_graph.sh
 .PHONY: dg
